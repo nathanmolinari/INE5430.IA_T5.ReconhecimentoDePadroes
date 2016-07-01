@@ -32,81 +32,65 @@ for i=0:quantidadeDigitos-1
     dadoTesteSaida(1:1, inicioDestinoTeste:fimDestinoTeste) = y(1:1, inicioOrigemTeste:fimOrigemTeste);
 end
 
-%Normalize os atributos de entrada do conjunto de treinamento...
-[VentTreinDados_N,PS]=mapminmax(X);
+pause
+displayDigit(X, 501);
 
-%Normalize os atributos de entrada do conjunto de teste.
-VentTestDados_N=mapminmax('apply',VentTestDados,PS);
+[dadoTreinamentoEntrada_N,PS]=mapminmax(dadoTreinamentoEntrada);
+
+dadoTesteEntrada_N=mapminmax('apply',dadoTesteEntrada,PS);
 pause % Strike any key to continue...
 
 
-%Crie a rede neural que ser� usada no problema.
-%(uma rede feed forward, com 10 neur�nios na camada intermedi�ria,
-%fun��es de sa�da tangente hiperb�lica, treinamento usando
-%levemberg-marquadt
-net = newff(VentTreinDados_N,SaidaTrein,10,{'tansig', 'tansig'},'traingdx');
+
+net = newff(dadoTreinamentoEntrada_N,dadoTreinamentoSaida,10,{'tansig', 'tansig'},'traingdx');
 net.trainParam.epochs=10000; % m�ximo de �pocas
 net.trainParam.goal=0.01;    % erro m�nimo
-pause % Strike any key to continue...
 
-%como j� temos um conjunto separado para teste, devemos dizer para o MATLAB
-%que todos os exemplos ser�o utilizados para treinar a rede �
-%neste caso tamb�m n�o iremos parar o treinamento por in�cio de
-%sobretreinamento e portanto tamb�m n�o teremos conjunto de valida��o
+
 net.divideParam.trainRatio=1.0; % Tudo para treino
 net.divideParam.valRatio=0;     % Nada para valid
 net.divideParam.testRatio=0;    % Nada para teste
-pause % Strike any key to continue...
+
 
 %Treine a rede.
-net=train(net,VentTreinDados_N,SaidaTrein);
-pause % Strike any key to continue...
+net=train(net,dadoTreinamentoEntrada_N,dadoTreinamentoSaida);
+
 
 %Simule a rede para os dados do treinamento.
-Y=sim(net,VentTreinDados_N);
-pause % Strike any key to continue...
+Y=sim(net,dadoTreinamentoEntrada_N);
 
-%Sature a sa�da da rede para os mesmos valores de sa�da dos exemplos de treinamento.
-echo off
-for i=1:size(VentTreinDados_N,2)
-	if Y(1,i)>Y(2,i)
-		YClass(1,i)=1;
-		YClass(2,i)=0;
-	else
-		YClass(1,i)=0;
-		YClass(2,i)=1;
-	end
-end
-echo on
-pause % Strike any key to continue...
+%Simule a rede para os dados do teste.
+% Y=sim(net,dadoTesteEntrada_N);
+
+
 
 %Visualize o desempenho da rede para aprender os exemplos de treinamento plotando a matriz de confus�o.
-plotconfusion(SaidaTrein,YClass);
-pause % Strike any key to continue...
-
-clear YClass;
-%Simule  a rede para os dados de teste.
-Y=sim(net,VentTestDados_N);
-pause % Strike any key to continue...
-echo off
-
-echo on
-%Sature  a sa�da da rede para os mesmos valores de sa�da dos exemplos de teste.
-echo off
-for i=1:size(VentTestDados_N,2)
-	if Y(1,i)>Y(2,i)
-		YClass(1,i)=1;
-		YClass(2,i)=0;
-	else
-		YClass(1,i)=0;
-		YClass(2,i)=1;
-	end
-end
-echo on
-pause % Strike any key to continue...
-%echo offzz
-
-echo on
-%Visualize o desempenho da rede para aprender os exemplos de teste plotando a matriz de confus�o.
-plotconfusion(SaidaTest,YClass);
-echo off
+% plotconfusion(dadoTreinamentoSaida,Y);
+% pause % Strike any key to continue...
+%
+% clear YClass;
+% %Simule  a rede para os dados de teste.
+% Y=sim(net,dadoTesteEntrada_N);
+% pause % Strike any key to continue...
+% echo off
+%
+% echo on
+% %Sature  a sa�da da rede para os mesmos valores de sa�da dos exemplos de teste.
+% echo off
+% for i=1:size(dadoTesteEntrada_N,2)
+% 	if Y(1,i)>Y(2,i)
+% 		YClass(1,i)=1;
+% 		YClass(2,i)=0;
+% 	else
+% 		YClass(1,i)=0;
+% 		YClass(2,i)=1;
+% 	end
+% end
+% echo on
+% pause % Strike any key to continue...
+% %echo offzz
+%
+% echo on
+% %Visualize o desempenho da rede para aprender os exemplos de teste plotando a matriz de confus�o.
+% plotconfusion(dadoTesteSaida,YClass);
+% echo off
